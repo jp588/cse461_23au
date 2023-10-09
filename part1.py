@@ -6,11 +6,11 @@ PORT = 12235  # The port used by the server
 
 step = 1  # Step a1
 student_id = 786  # Last 3 digits of your student number
-message = 'hello world'  # Message to send
+message = b'hello world'  # Message to send
 payload_len = len(message)
 
 padding = (4 - (payload_len % 4)) % 4
-message += '\0' * padding  # Add null byte padding to the message if needed
+message += b'\0' * padding  # Add null byte padding to the message if needed
 payload_len += padding
 
 # psecret for stage a
@@ -20,7 +20,8 @@ psecret = 0
 header = struct.pack('!IIH H', payload_len, psecret, step, student_id)
 
 # Concatenate header and payload
-packet = header + message.encode('utf-8')
+packet = header + message
+print(packet)
 
 
 
