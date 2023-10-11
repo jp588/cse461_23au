@@ -35,7 +35,8 @@ try:
     sock.sendto(packet, server_address)
 
     data, server = sock.recvfrom(2048)
-    num, len_, udp_port, secretA = struct.unpack('!IIII', data)
+    HEADERSIZE = 12
+    num, len_, udp_port, secretA = struct.unpack('!IIII', data[HEADERSIZE:])
 
     print(f"Received data from {server}:")
     print(f"num: {num}, len: {len_}, udp_port: {udp_port}, secretA: {secretA}")
