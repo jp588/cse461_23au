@@ -4,26 +4,7 @@ import time
 
 HOST = "attu2.cs.washington.edu"
 PORT = 12235
-
-step = 1  # Step a1
-student_id = 786  # Last 3 digits of your student number
-message = b'hello world'  # Message to send
-payload_len = len(message)
-
-padding = (4 - (payload_len % 4)) % 4
-message += b'\0' * padding  # Add null byte padding to the message if needed
-payload_len += padding
-
-# psecret for stage a
-psecret = 0
-
-# Construct header
-header = struct.pack('!IIH H', payload_len, psecret, step, student_id)
-
-# Concatenate header and payload
-packet = header + message
-print(packet)
-
+STUDENT_ID = 786
 
 def makePacket(payload, secret, step):
 
@@ -42,12 +23,14 @@ def makePacket(payload, secret, step):
     return packet
 
 
-
-# UDP socket
+# STAGE a
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
 try:
+    # Create packet
+    packet = makePacket(b'hello world', 0, 1)
+
     # Send data
     sock.sendto(packet, (HOST, PORT))
 
@@ -64,8 +47,6 @@ except struct.error:
 finally:
     # Close the socket
     sock.close()
-
-
 
 
 # Step b1
