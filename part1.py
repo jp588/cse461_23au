@@ -2,9 +2,11 @@ import socket
 import struct
 import time
 
+# Constants
 HOST = "attu2.cs.washington.edu"
-PORT = 12235
 STUDENT_ID = 786
+HEADERSIZE = 12
+
 
 def makePacket(payload, secret, step):
 
@@ -23,19 +25,20 @@ def makePacket(payload, secret, step):
     return packet
 
 
-# STAGE a
+print("Step a1")
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
+# Create packet
+udp_port = 12235
+packet = makePacket(b'hello world', 0, 1)
+
+# Send data
+sock.sendto(packet, (HOST, udp_port))
+
+print("Step a2")
 try:
-    # Create packet
-    packet = makePacket(b'hello world', 0, 1)
-
-    # Send data
-    sock.sendto(packet, (HOST, PORT))
-
     data, server = sock.recvfrom(2048)
-    HEADERSIZE = 12
     num, len_, udp_port, secretA = struct.unpack('!IIII', data[HEADERSIZE:])
 
     print(f"Received data from {server}:")
@@ -49,7 +52,7 @@ finally:
     sock.close()
 
 
-# Step b1
+print("Step b1")
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
@@ -75,7 +78,8 @@ while len(acknowledged_packets) < num:
     # Avoiding network congestion
     time.sleep(0.5)
 
-# Step b2
+
+print("Step b2")
 try:
     data, server = sock.recvfrom(2048)
     tcp_port, secretB = struct.unpack('!II', data)
