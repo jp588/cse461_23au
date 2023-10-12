@@ -22,6 +22,21 @@ def makePacket(payload, secret, step):
     packet = header + payload
     return packet
 
+def makePacket_b(payload, secret, step):
+    # Align payload to 4-byte boundary
+    payload_len = len(payload)
+    header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
+    print("payload_len: ", payload_len)
+    padding = (4 - (payload_len % 4)) % 4
+    payload += b'\0' * padding  # Add null byte padding to the message if needed
+    payload_len += + padding
+
+    # Construct header
+    # header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
+
+    # Concatenate header and payload
+    packet = header + payload
+    return packet
 
 def packetToStr(packet):
     s = "+++++++++++++++++++++++++\n"
@@ -64,9 +79,6 @@ finally:
     sock.close()
 print()
 
-if len_%4 != 0:
-    exit(1)
-
 print("Step b1")
 socket_address = (HOST, udp_port)
 
@@ -79,11 +91,13 @@ for packet_id in range(num):
     packet_id_packed = struct.pack('!I', packet_id)  # Packing packet_id into 4 bytes.
     message = packet_id_packed + payload_data  # Concatenating packet_id and payload.
 
+    packet = makePacket_b(message, secretA, 1)
+
     # Calculating padding and adding it to the message.
     padding = (4 - (len(message) % 4)) % 4
-    message += b'\0' * padding
+    packet += b'\0' * padding
 
-    packet = makePacket(message, secretA, 1)
+    # packet = makePacket(message, secretA, 1)
 
     # Awaiting acknowledgments
     while True:  # Resending logic until ACK is received.
