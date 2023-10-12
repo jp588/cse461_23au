@@ -9,7 +9,6 @@ HEADERSIZE = 12
 
 
 def makePacket(payload, secret, step):
-
     # Align payload to 4-byte boundary
     payload_len = len(payload)
     padding = (4 - (payload_len % 4)) % 4
@@ -21,8 +20,18 @@ def makePacket(payload, secret, step):
 
     # Concatenate header and payload
     packet = header + payload
-    print(packet)
     return packet
+
+
+def packetToStr(packet):
+    s = "+++++++++++++++++++++++++\n"
+    for i in range(int(len(packet) / 4)):
+        s += str(packet[4*i]) + " "
+        s += str(packet[4*i+1]) + " "
+        s += str(packet[4*i+2]) + " "
+        s += str(packet[4*i+3]) + "\n"
+    s += "-------------------------"
+    return s
 
 
 print("Step a1")
@@ -30,11 +39,14 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
 # Create packet
-udp_port = 12235
 packet = makePacket(b'hello world', 0, 1)
 
 # Send data
-sock.sendto(packet, (HOST, udp_port))
+socket_address = (HOST, 12235)
+sock.sendto(packet, socket_address)
+print("Sent packet {} to {}".format(packetToStr(packet), socket_address))
+print()
+
 
 print("Step a2")
 try:
@@ -50,33 +62,49 @@ except struct.error:
 finally:
     # Close the socket
     sock.close()
+print()
 
 
 print("Step b1")
+socket_address = (HOST, udp_port)
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
-acknowledged_packets = set()
-while len(acknowledged_packets) < num:
-    # Sending packets
-    for packet_id in range(num):
-        if packet_id not in acknowledged_packets:
-            # Construct packet with packet_id and len_ zeros as payload
-            packet_data = struct.pack('!I', packet_id) + b'\0' * len_
-            sock.sendto(packet_data, (HOST, udp_port))
-            print(f"Sent packet {packet_id} to {(HOST, udp_port)}")
+# Sending packets
+for packet_id in range(num):
+    payload_data = b'\0' * len_
+    packet_id_packed = struct.pack('!I', packet_id)  # Packing packet_id into 4 bytes.
+    message = packet_id_packed + payload_data  # Concatenating packet_id and payload.
+
+    # Calculating padding and adding it to the message.
+    padding = (4 - (len(message) % 4)) % 4
+    message += b'\0' * padding
+
+    packet = makePacket(message, secretA, 1)
 
     # Awaiting acknowledgments
-    try:
-        data, server = sock.recvfrom(2048)
-        acked_packet_id, = struct.unpack('!I', data)
-        acknowledged_packets.add(acked_packet_id)
-        print(f"Received acknowledgment for packet {acked_packet_id}")
-    except socket.timeout:
-        print("Acknowledgment not received. Resending packets...")
+    while True:  # Resending logic until ACK is received.
+        # Send packet.
+        sock.sendto(packet, socket_address)
+        print("Sent packet {} to {}".format(packetToStr(packet), socket_address))
 
-    # Avoiding network congestion
-    time.sleep(0.5)
+        # Wait for ACK.
+        try:
+            ack_data, server = sock.recvfrom(2048)
+            # Extract and validate ACK.
+            acked_packet_id = struct.unpack('!I', ack_data[12:])  # Assuming header is 12 bytes.
+            if acked_packet_id[0] == packet_id:
+                print(f"ACK received for packet_id: {packet_id}")
+                break  # Exit the loop if correct ACK received.
+        except socket.timeout:
+            print(f"Timeout. Resending packet_id: {packet_id}")
+            # Avoiding network congestion
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            exit(1)  # Exit the program if an error occurs.
+print()
 
 
 print("Step b2")
@@ -88,3 +116,4 @@ except socket.timeout:
     print("Did not receive TCP port and secretB. Exiting.")
 finally:
     sock.close()
+print()
