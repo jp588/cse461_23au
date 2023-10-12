@@ -64,12 +64,14 @@ finally:
     sock.close()
 print()
 
+if len_%4 != 0:
+    exit(1)
 
 print("Step b1")
 socket_address = (HOST, udp_port)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.settimeout(5)
+sock.settimeout(.5)
 
 # Sending packets
 for packet_id in range(num):
@@ -93,8 +95,8 @@ for packet_id in range(num):
         try:
             ack_data, server = sock.recvfrom(2048)
             # Extract and validate ACK.
-            acked_packet_id = struct.unpack('!I', ack_data[12:])  # Assuming header is 12 bytes.
-            if acked_packet_id[0] == packet_id:
+            acked_packet_id, = struct.unpack('!I', ack_data[HEADERSIZE:])  # Assuming header is 12 bytes.
+            if acked_packet_id == packet_id:
                 print(f"ACK received for packet_id: {packet_id}")
                 break  # Exit the loop if correct ACK received.
         except socket.timeout:
@@ -110,7 +112,7 @@ print()
 print("Step b2")
 try:
     data, server = sock.recvfrom(2048)
-    tcp_port, secretB = struct.unpack('!II', data)
+    tcp_port, secretB = struct.unpack('!II', data[HEADERSIZE:])
     print(f"Received TCP port: {tcp_port}, secretB: {secretB}")
 except socket.timeout:
     print("Did not receive TCP port and secretB. Exiting.")
