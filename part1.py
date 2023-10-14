@@ -7,36 +7,15 @@ HOST = "attu2.cs.washington.edu"
 STUDENT_ID = 786
 HEADERSIZE = 12
 
-
 def makePacket(payload, secret, step):
     # Align payload to 4-byte boundary
     payload_len = len(payload)
+    header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
     padding = (4 - (payload_len % 4)) % 4
     payload += b'\0' * padding  # Add null byte padding to the message if needed
-    payload_len += + padding
-
-    # Construct header
-    header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
 
     # Concatenate header and payload
-    packet = header + payload
-    return packet
-
-def makePacket_b(payload, secret, step):
-    # Align payload to 4-byte boundary
-    payload_len = len(payload)
-    header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
-    print("payload_len: ", payload_len)
-    padding = (4 - (payload_len % 4)) % 4
-    payload += b'\0' * padding  # Add null byte padding to the message if needed
-    payload_len += + padding
-
-    # Construct header
-    # header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
-
-    # Concatenate header and payload
-    packet = header + payload
-    return packet
+    return header + payload
 
 def packetToStr(packet):
     s = "+++++++++++++++++++++++++\n"
@@ -54,7 +33,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
 # Create packet
-packet = makePacket(b'hello world', 0, 1)
+packet = makePacket(b'hello world\0', 0, 1)
 
 # Send data
 socket_address = (HOST, 12235)
@@ -91,7 +70,7 @@ for packet_id in range(num):
     packet_id_packed = struct.pack('!I', packet_id)  # Packing packet_id into 4 bytes.
     message = packet_id_packed + payload_data  # Concatenating packet_id and payload.
 
-    packet = makePacket_b(message, secretA, 1)
+    packet = makePacket(message, secretA, 1)
 
     # Calculating padding and adding it to the message.
     padding = (4 - (len(message) % 4)) % 4
