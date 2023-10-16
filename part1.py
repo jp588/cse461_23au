@@ -112,3 +112,15 @@ except socket.timeout:
 finally:
     sock.close()
 print()
+
+
+print("Part c")
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+socket_address = (HOST, tcp_port)
+sock.connect(socket_address)
+data, server = sock.recvfrom(2048)
+print(f"data: {data}")
+num2, len2, secretC, c, c1, c2, c3 = struct.unpack('!IIIcccc', data[HEADERSIZE:])
+#c = c.decode("utf-8")
+print(f"Received data from {server}:")
+print(f"num2: {num2}, len2: {len2}, secretC: {secretC}, c: {c}")
