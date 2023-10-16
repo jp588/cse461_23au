@@ -118,12 +118,11 @@ print("Step c1")
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_address = (HOST, tcp_port)
 sock.connect(socket_address)
-data, server = sock.recvfrom(2048)
+data = sock.recv(2048)
 print(f"data: {data}")
 
 print ("Step c2")
 num2, len2, secretC, c, _, _, _ = struct.unpack('!IIIcccc', data[HEADERSIZE:])
-print(f"Received data from {server}:")
 print(f"num2: {num2}, len2: {len2}, secretC: {secretC}, c: {c}")
 
 
@@ -135,8 +134,9 @@ for _ in range(num2):
     print(f"Sent packet {packetToStr(packet)} to {socket_address}")
 
 print("Step d2")
-data, server = sock.recvfrom(2048)
-print(f"Received data from {server}:")
+data = sock.recv(2048)
 print(f"data: {data}")
 secretD = struct.unpack('!I', data[HEADERSIZE:])[0]
 print(f"secretD: {secretD}")
+
+sock.close()
