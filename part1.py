@@ -4,6 +4,8 @@ import time
 
 # Constants
 HOST = "attu2.cs.washington.edu"
+# HOST = "localhost"
+PORT = 12235
 STUDENT_ID = 786
 HEADERSIZE = 12
 
@@ -36,7 +38,7 @@ sock.settimeout(5)
 packet = makePacket(b'hello world\0', 0, 1)
 
 # Send data
-socket_address = (HOST, 12235)
+socket_address = (HOST, PORT)
 sock.sendto(packet, socket_address)
 print("Sent packet {} to {}".format(packetToStr(packet), socket_address))
 print()
