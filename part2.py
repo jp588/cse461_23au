@@ -8,6 +8,20 @@ PORT = 12235
 BYTES = 2048
 HEADERSIZE = 12
 
+STUDENT_ID = 786    # Remove later
+
+
+def makePacket(payload, secret, step, student_id):
+    # Align payload to 4-byte boundary
+    payload_len = len(payload)
+    header = struct.pack('!IIHH', payload_len, secret, step, student_id)
+    padding = (4 - (payload_len % 4)) % 4
+    payload += b'\0' * padding  # Add null byte padding to the message if needed
+
+    # Concatenate header and payload
+    return header + payload
+
+
 listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Use UDP
 listener.bind((HOST, PORT))
 print(f"Server started on {HOST}:{PORT}")
@@ -50,12 +64,9 @@ while True:
             udp_port = random.randint(0, 65535)
             secretA = random.randint(0, 1000)
 
-            response = struct.pack('!IIII', num, len_, udp_port, secretA)
+            payload = struct.pack('!IIII', num, len_, udp_port, secretA)
 
-            padding = (4 - (payload_len % 4)) % 4
-            response += b'\0' * padding  # Add null byte padding to the message if needed
-
-            packet = header + response
+            packet = makePacket(payload, secret, 2, student_id)
 
             listener.sendto(packet, client_addr)
             print(f"Sent response to {client_addr}")
@@ -66,3 +77,26 @@ while True:
         break
     except Exception as e:
         print(f"Error: {e}")
+
+
+"""
+# STAGE C
+tcp_port = 47241
+secretB = 100
+
+listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
+listener.bind((HOST, tcp_port))
+print(f"Server started on {HOST}:{tcp_port}")
+
+listener.listen()
+conn, client_addr = listener.accept()
+with conn:
+    print(f"Connected with {client_addr}")
+    num2 = random.randint(1, 100)
+    len2 = random.randint(1, 100)
+    secretC = random.randint(0, 1000)
+    c = random.randint(1, 256).to_bytes(1, 'big')
+    payload = struct.pack('!IIIc', num2, len2, secretC, c)
+    packet = makePacket(payload, secretB, 1, STUDENT_ID)
+    conn.send(packet)
+"""
