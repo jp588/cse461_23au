@@ -69,5 +69,11 @@ while True:
         print("Did not receive any packets for 3 seconds. Closing connection.")
         listener.close()
         break
+    except struct.error:
+        print("Received data could not be unpacked. Possible incorrect format.")
+        listener.close()
+        break
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected Error: {e}")
+        listener.close()
+        break
