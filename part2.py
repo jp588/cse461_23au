@@ -22,6 +22,11 @@ while True:
 
         payload_len, secret, step, student_id = struct.unpack('!IIHH', data[:HEADERSIZE])
 
+        if secret != 0:
+            print(f"Invalid secret: {secret} from {client_addr}")
+            listener.close()
+            break
+
         if len(data) % 4 != 0:
             print(f"Invalid buffer length: {len(data)} from {client_addr}")
             listener.close()
