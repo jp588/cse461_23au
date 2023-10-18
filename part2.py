@@ -36,6 +36,11 @@ while True:
 
         payload_len, secret, step, student_id = struct.unpack('!IIHH', data[:HEADERSIZE])
 
+        if secret != 0:
+            print(f"Invalid secret: {secret} from {client_addr}")
+            listener.close()
+            break
+
         if len(data) % 4 != 0:
             print(f"Invalid buffer length: {len(data)} from {client_addr}")
             listener.close()
@@ -61,7 +66,7 @@ while True:
             # Not sure about the range
             num = random.randint(1, 100)
             len_ = random.randint(1, 100)
-            udp_port = random.randint(0, 65535)
+            udp_port = random.randint(1024, 65535)
             secretA = random.randint(0, 1000)
 
             payload = struct.pack('!IIII', num, len_, udp_port, secretA)
@@ -75,8 +80,14 @@ while True:
         print("Did not receive any packets for 3 seconds. Closing connection.")
         listener.close()
         break
+    except struct.error:
+        print("Received data could not be unpacked. Possible incorrect format.")
+        listener.close()
+        break
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected Error: {e}")
+        listener.close()
+        break
 
 
 """
