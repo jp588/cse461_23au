@@ -47,7 +47,7 @@ while True:
             # Not sure about the range
             num = random.randint(1, 100)
             len_ = random.randint(1, 100)
-            udp_port = random.randint(0, 65535)
+            udp_port = random.randint(1024, 65535)
             secretA = random.randint(0, 1000)
 
             response = struct.pack('!IIII', num, len_, udp_port, secretA)
