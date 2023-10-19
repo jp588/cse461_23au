@@ -70,11 +70,20 @@ while True:
             secretA = random.randint(0, 1000)
 
             payload = struct.pack('!IIII', num, len_, udp_port, secretA)
-
             packet = makePacket(payload, secret, 2, student_id)
-
             listener.sendto(packet, client_addr)
             print(f"Sent response to {client_addr}")
+
+        """
+        # STAGE B2
+        tcp_port = random.randint(1024, 65535)
+        secretB = 100
+
+        payload = struct.pack('!II', tcp_port, secretB)
+        packet = makePacket(payload, secretA, 2, student_id)
+        listener.sendto(packet, client_addr)
+        print(f"Sent response (b2) to {client_addr}")
+        """
 
     except socket.timeout:
         print("Did not receive any packets for 3 seconds. Closing connection.")
@@ -92,8 +101,6 @@ while True:
 
 """
 # STAGE C
-tcp_port = 47241
-secretB = 100
 
 listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
 listener.bind((HOST, tcp_port))
