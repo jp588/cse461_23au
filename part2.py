@@ -26,6 +26,7 @@ listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Use UDP
 listener.bind((HOST, PORT))
 print(f"Server started on {HOST}:{PORT}")
 
+print("Stage A")
 while True:
     try:
         # Setting the 3-second timeout
@@ -99,8 +100,9 @@ while True:
         break
 
 
-"""
-# STAGE C
+print("Stage C")
+tcp_port = 47241
+secretB = 100
 
 listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
 listener.bind((HOST, tcp_port))
@@ -117,4 +119,5 @@ with conn:
     payload = struct.pack('!IIIc', num2, len2, secretC, c)
     packet = makePacket(payload, secretB, 1, STUDENT_ID)
     conn.send(packet)
-"""
+
+
