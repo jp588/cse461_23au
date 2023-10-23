@@ -75,8 +75,8 @@ for packet_id in range(num):
     packet = makePacket(message, secretA, 1)
 
     # Calculating padding and adding it to the message.
-    padding = (4 - (len(message) % 4)) % 4
-    packet += b'\0' * padding
+    # padding = (4 - (len(message) % 4)) % 4
+    # packet += b'\0' * padding
 
     # packet = makePacket(message, secretA, 1)
 
