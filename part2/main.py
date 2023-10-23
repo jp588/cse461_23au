@@ -198,7 +198,7 @@ with conn:
     secretC = random.randint(0, 1000)
     c = random.randint(1, 256).to_bytes(1, 'big')
     payload = struct.pack('!IIIc', num2, len2, secretC, c)
-    packet = makePacket(payload, secretC, 1, STUDENT_ID)  # TODO: Change step?
+    packet = makePacket(payload, secretB, 1, STUDENT_ID)  # TODO: Change step?
     conn.send(packet)
 
 
@@ -217,5 +217,5 @@ with conn:
 
     secretD = random.randint(0, 1000)
     payload = struct.pack('!I', secretD)
-    packet = makePacket(payload, secretD, 1, STUDENT_ID)  # TODO: Change step?
+    packet = makePacket(payload, secretC, 1, STUDENT_ID)  # TODO: Change step?
     conn.send(packet)
