@@ -121,3 +121,5 @@ with conn:
     conn.send(packet)
 
 
+print("Stage D")
+
