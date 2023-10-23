@@ -180,8 +180,6 @@ print(f"Sent response (b2) to {client_addr}")
 print("Stage B done.")
 
 print("Stage C")
-tcp_port = 47241
-secretB = 100
 
 listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
 listener.bind((HOST, tcp_port))
@@ -191,27 +189,17 @@ listener.listen()
 conn, client_addr = listener.accept()
 with conn:
     print(f"Connected with {client_addr}")
-    data = conn.recv(BYTES)  # TODO: verify payload from client
 
     num2 = random.randint(1, 100)
     len2 = random.randint(1, 100)
     secretC = random.randint(0, 1000)
     c = random.randint(1, 256).to_bytes(1, 'big')
     payload = struct.pack('!IIIc', num2, len2, secretC, c)
-    packet = makePacket(payload, secretB, 1, STUDENT_ID)  # TODO: Change step?
+    packet = makePacket(payload, secretB, 1, STUDENT_ID)
     conn.send(packet)
 
+    print("Stage D")
 
-print("Stage D")
-
-listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
-listener.bind((HOST, tcp_port))  # TODO: Change port
-print(f"Server started on {HOST}:{tcp_port}")
-
-listener.listen()
-conn, client_addr = listener.accept()
-with conn:
-    print(f"Connected with {client_addr}")
     data = conn.recv(BYTES)  # TODO: Maybe num2 * len2?
     # TODO: Verify payload from client
 
