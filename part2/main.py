@@ -137,7 +137,7 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
         print(f"Receiving {num2} packets")
         for i in range(num2):
             padding = (4 - (len2 % 4)) % 4
-            data = conn.recv(12 + len2 + padding)
+            data = conn.recv(HEADERSIZE + len2 + padding)
             print(f"Received {i}")
             # TODO: Verify payload from client
 
