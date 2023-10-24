@@ -135,7 +135,7 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
         num2 = random.randint(1, 100)
         len2 = random.randint(1, 100)
         secretC = random.randint(0, 1000)
-        c = random.randint(1, 256).to_bytes(1, "big")
+        c = random.randint(1, 255).to_bytes(1, "big")
         payload = struct.pack("!IIIc", num2, len2, secretC, c)
         packet = make_packet(payload, secretB, 2, student_id)
         conn.send(packet)
