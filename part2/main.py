@@ -139,6 +139,25 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
             padding = (4 - (len2 % 4)) % 4
             data = conn.recv(HEADERSIZE + len2 + padding)
             print(f"Received {i + 1}/{num2} packets")
+
+            payload_len, secret, step, student_id = struct.unpack('!IIHH', data[:HEADERSIZE])
+
+            # Check the header
+            if step != 1:
+                print(f"Invalid step: {step} from {client_addr}")
+                udp_socket.close()
+                return
+
+            if secret != secretC:
+                print(f"Invalid secret: {secret} from {client_addr}")
+                udp_socket.close()
+                return
+
+            if (len(data) - HEADERSIZE) % 4 != 0:
+                print(f"Received invalid data length from {client_addr}: {len(data) - HEADERSIZE}")
+                print(len(data))
+                udp_socket.close()
+                return
             # TODO: Verify payload from client
 
         secretD = random.randint(0, 1000)
