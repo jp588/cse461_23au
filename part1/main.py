@@ -60,6 +60,7 @@ finally:
     sock.close()
 print()
 
+time.sleep(1)
 print("Step b1")
 socket_address = (HOST, udp_port)
 
