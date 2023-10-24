@@ -9,23 +9,25 @@ PORT = 12235
 STUDENT_ID = 786
 HEADERSIZE = 12
 
+
 def makePacket(payload, secret, step):
     # Align payload to 4-byte boundary
     payload_len = len(payload)
-    header = struct.pack('!IIHH', payload_len, secret, step, STUDENT_ID)
+    header = struct.pack("!IIHH", payload_len, secret, step, STUDENT_ID)
     padding = (4 - (payload_len % 4)) % 4
-    payload += b'\0' * padding  # Add null byte padding to the message if needed
+    payload += b"\0" * padding  # Add null byte padding to the message if needed
 
     # Concatenate header and payload
     return header + payload
 
+
 def packetToStr(packet):
     s = "+++++++++++++++++++++++++\n"
     for i in range(int(len(packet) / 4)):
-        s += str(packet[4*i]) + " "
-        s += str(packet[4*i+1]) + " "
-        s += str(packet[4*i+2]) + " "
-        s += str(packet[4*i+3]) + "\n"
+        s += str(packet[4 * i]) + " "
+        s += str(packet[4 * i + 1]) + " "
+        s += str(packet[4 * i + 2]) + " "
+        s += str(packet[4 * i + 3]) + "\n"
     s += "-------------------------"
     return s
 
@@ -35,7 +37,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 
 # Create packet
-packet = makePacket(b'hello world\0', 0, 1)
+packet = makePacket(b"hello world\0", 0, 1)
 
 # Send data
 socket_address = (HOST, PORT)
@@ -47,7 +49,7 @@ print()
 print("Step a2")
 try:
     data, server = sock.recvfrom(2048)
-    num, len_, udp_port, secretA = struct.unpack('!IIII', data[HEADERSIZE:])
+    num, len_, udp_port, secretA = struct.unpack("!IIII", data[HEADERSIZE:])
 
     print(f"Received data from {server}:")
     print(f"num: {num}, len: {len_}, udp_port: {udp_port}, secretA: {secretA}")
@@ -65,12 +67,12 @@ print("Step b1")
 socket_address = (HOST, udp_port)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.settimeout(.5)
+sock.settimeout(0.5)
 
 # Sending packets
 for packet_id in range(num):
-    payload_data = b'\0' * len_
-    packet_id_packed = struct.pack('!I', packet_id)  # Packing packet_id into 4 bytes.
+    payload_data = b"\0" * len_
+    packet_id_packed = struct.pack("!I", packet_id)  # Packing packet_id into 4 bytes.
     message = packet_id_packed + payload_data  # Concatenating packet_id and payload.
 
     packet = makePacket(message, secretA, 1)
@@ -91,7 +93,9 @@ for packet_id in range(num):
         try:
             ack_data, server = sock.recvfrom(2048)
             # Extract and validate ACK.
-            acked_packet_id, = struct.unpack('!I', ack_data[HEADERSIZE:])  # Assuming header is 12 bytes.
+            (acked_packet_id,) = struct.unpack(
+                "!I", ack_data[HEADERSIZE:]
+            )  # Assuming header is 12 bytes.
             if acked_packet_id == packet_id:
                 print(f"ACK received for packet_id: {packet_id}")
                 break  # Exit the loop if correct ACK received.
@@ -108,7 +112,7 @@ print()
 print("Step b2")
 try:
     data, server = sock.recvfrom(2048)
-    tcp_port, secretB = struct.unpack('!II', data[HEADERSIZE:])
+    tcp_port, secretB = struct.unpack("!II", data[HEADERSIZE:])
     print(f"Received TCP port: {tcp_port}, secretB: {secretB}")
 except socket.timeout:
     print("Did not receive TCP port and secretB. Exiting.")
@@ -124,8 +128,8 @@ sock.connect(socket_address)
 data = sock.recv(2048)
 print(f"data: {data}")
 
-print ("Step c2")
-num2, len2, secretC, c, _, _, _ = struct.unpack('!IIIcccc', data[HEADERSIZE:])
+print("Step c2")
+num2, len2, secretC, c, _, _, _ = struct.unpack("!IIIcccc", data[HEADERSIZE:])
 print(f"num2: {num2}, len2: {len2}, secretC: {secretC}, c: {c}")
 
 
@@ -140,7 +144,7 @@ for i in range(num2):
 print("Step d2")
 data = sock.recv(2048)
 print(f"data: {data}")
-secretD = struct.unpack('!I', data[HEADERSIZE:])[0]
+secretD = struct.unpack("!I", data[HEADERSIZE:])[0]
 print(f"secretD: {secretD}")
 
 sock.close()
