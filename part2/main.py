@@ -129,7 +129,7 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
         secretC = random.randint(0, 1000)
         c = random.randint(1, 256).to_bytes(1, 'big')
         payload = struct.pack('!IIIc', num2, len2, secretC, c)
-        packet = make_packet(payload, secretB, 1, student_id)
+        packet = make_packet(payload, secretB, 2, student_id)
         conn.send(packet)
 
         print("Stage D")
@@ -139,7 +139,7 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
 
         secretD = random.randint(0, 1000)
         payload = struct.pack('!I', secretD)
-        packet = make_packet(payload, secretC, 1, student_id)  # TODO: Change step?
+        packet = make_packet(payload, secretC, 2, student_id)  # TODO: Change step?
         conn.send(packet)
 
 
