@@ -158,12 +158,18 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
                 print(len(data))
                 udp_socket.close()
                 return
-            # TODO: Verify payload from client
+
+            # Check if the payload is all c of length len2 with padding
+            if data[HEADERSIZE:HEADERSIZE + len2] != c * len2:
+                print(f"Invalid payload from {client_addr}. Should be all {c} of length {len2}.")
+                udp_socket.close()
+                return
 
         secretD = random.randint(0, 1000)
         payload = struct.pack('!I', secretD)
         packet = make_packet(payload, secretC, 2, student_id)
         conn.send(packet)
+        print("Stage D done.")
 
 
 while True:
