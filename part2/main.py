@@ -134,12 +134,15 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
 
         print("Stage D")
 
-        data = conn.recv(BYTES)  # TODO: Maybe num2 * len2?
-        # TODO: Verify payload from client
+        print(f"Receiving {num2} packets")
+        for i in range(num2):
+            data = conn.recv(BYTES)
+            print(f"Received {i}")
+            # TODO: Verify payload from client
 
         secretD = random.randint(0, 1000)
         payload = struct.pack('!I', secretD)
-        packet = make_packet(payload, secretC, 2, student_id)  # TODO: Change step?
+        packet = make_packet(payload, secretC, 2, student_id)
         conn.send(packet)
 
 
