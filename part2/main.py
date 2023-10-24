@@ -24,9 +24,8 @@ def make_packet(payload, secret, step, student_id):
     return header + payload
 
 
-def check_zero(data, payload_len):
-    # The initial 4 bytes are the packet_id, so we start checking from byte 5
-    remaining_payload = data[HEADERSIZE + 4 : HEADERSIZE + payload_len]
+def check_zero(data, offset, payload_len):
+    remaining_payload = data[HEADERSIZE + offset : HEADERSIZE + payload_len]
     for byte in remaining_payload:
         if byte != 0:
             return False
@@ -71,7 +70,8 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
                 udp_socket.close()
                 return
 
-            if not check_zero(data, payload_len):  # Only for stage B
+            if not check_zero(data, 4, payload_len):  # Only for stage B
+                # The initial 4 bytes are the packet_id, so we start checking from byte 5
                 print(
                     f"Invalid payload from {client_addr}. Non-zero bytes found after payload_len."
                 )
@@ -175,6 +175,13 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
             if data[HEADERSIZE : HEADERSIZE + len2] != c * len2:
                 print(
                     f"Invalid payload from {client_addr}. Should be all {c} of length {len2}."
+                )
+                udp_socket.close()
+                return
+
+            if not check_zero(data, len2, payload_len):  # Only for stage D
+                print(
+                    f"Invalid payload from {client_addr}. Non-zero bytes found after payload_len."
                 )
                 udp_socket.close()
                 return
