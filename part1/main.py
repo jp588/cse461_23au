@@ -130,11 +130,12 @@ print(f"num2: {num2}, len2: {len2}, secretC: {secretC}, c: {c}")
 
 
 print("Step d1")
-for _ in range(num2):
+for i in range(num2):
     payload = c * len2
     packet = makePacket(payload, secretC, 1)
     sock.send(packet)
     print(f"Sent packet {packetToStr(packet)} to {socket_address}")
+    print(i)
 
 print("Step d2")
 data = sock.recv(2048)
