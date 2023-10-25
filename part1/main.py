@@ -3,8 +3,8 @@ import struct
 import time
 
 # Constants
-# HOST = "attu2.cs.washington.edu"
-HOST = "127.0.0.1"
+HOST = "attu2.cs.washington.edu"
+# HOST = "127.0.0.1"
 PORT = 12235
 STUDENT_ID = 786
 HEADERSIZE = 12
