@@ -254,7 +254,6 @@ while True:
             header = struct.pack("!IIHH", payload_len, secret, step + 1, student_id)
 
             # Generate random response data as per specification
-            # Not sure about the range
             num = random.randint(1, 30)
             len_ = random.randint(1, 100)
             udp_port = random.randint(1024, 65535)
