@@ -125,72 +125,86 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
 
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Use TCP
     tcp_socket.bind((HOST, tcp_port))
+    tcp_socket.settimeout(TIMEOUT)
     print(f"Server started on {HOST}:{tcp_port}")
 
-    tcp_socket.listen()
-    conn, client_addr = tcp_socket.accept()
+    try:
+        tcp_socket.listen()
+        conn, client_addr = tcp_socket.accept()
+    except socket.timeout:
+        print(f"Client {client_addr} took longer than 3 seconds to connect. Closing TCP socket.")
+        tcp_socket.close()
+        return
+
     with conn:
-        print(f"Connected with {client_addr}")
+        try:
+            print(f"Connected with {client_addr}")
+            conn.settimeout(TIMEOUT)
 
-        num2 = random.randint(1, 100)
-        len2 = random.randint(1, 100)
-        secretC = random.randint(0, 1000)
-        c = random.randint(1, 255).to_bytes(1, "big")
-        payload = struct.pack("!IIIc", num2, len2, secretC, c)
-        packet = make_packet(payload, secretB, 2, student_id)
-        conn.send(packet)
+            num2 = random.randint(1, 100)
+            len2 = random.randint(1, 100)
+            secretC = random.randint(0, 1000)
+            c = random.randint(1, 255).to_bytes(1, "big")
+            payload = struct.pack("!IIIc", num2, len2, secretC, c)
+            packet = make_packet(payload, secretB, 2, student_id)
+            conn.send(packet)
 
-        print("Stage D")
+            print("Stage D")
 
-        print(f"Receiving {num2} packets")
-        for i in range(num2):
-            padding = (4 - (len2 % 4)) % 4
-            data = conn.recv(HEADERSIZE + len2 + padding)
-            print(f"Received {i + 1}/{num2} packets")
+            print(f"Receiving {num2} packets")
+            for i in range(num2):
+                padding = (4 - (len2 % 4)) % 4
+                data = conn.recv(HEADERSIZE + len2 + padding)
+                print(f"Received {i + 1}/{num2} packets")
 
-            payload_len, secret, step, student_id = struct.unpack(
-                "!IIHH", data[:HEADERSIZE]
-            )
-
-            # Check the header
-            if step != 1:
-                print(f"Invalid step: {step} from {client_addr}")
-                udp_socket.close()
-                return
-
-            if secret != secretC:
-                print(f"Invalid secret: {secret} from {client_addr}")
-                udp_socket.close()
-                return
-
-            if (len(data) - HEADERSIZE) % 4 != 0:
-                print(
-                    f"Received invalid data length from {client_addr}: {len(data) - HEADERSIZE}"
+                payload_len, secret, step, student_id = struct.unpack(
+                    "!IIHH", data[:HEADERSIZE]
                 )
-                print(len(data))
-                udp_socket.close()
-                return
 
-            # Check if the payload is all c of length len2 with padding
-            if data[HEADERSIZE : HEADERSIZE + len2] != c * len2:
-                print(
-                    f"Invalid payload from {client_addr}. Should be all {c} of length {len2}."
-                )
-                udp_socket.close()
-                return
+                # Check the header
+                if step != 1:
+                    print(f"Invalid step: {step} from {client_addr}")
+                    udp_socket.close()
+                    return
 
-            if not check_zero(data, len2, payload_len):  # Only for stage D
-                print(
-                    f"Invalid payload from {client_addr}. Non-zero bytes found after payload_len."
-                )
-                udp_socket.close()
-                return
+                if secret != secretC:
+                    print(f"Invalid secret: {secret} from {client_addr}")
+                    udp_socket.close()
+                    return
 
-        secretD = random.randint(0, 1000)
-        payload = struct.pack("!I", secretD)
-        packet = make_packet(payload, secretC, 2, student_id)
-        conn.send(packet)
-        print("Stage D done.")
+                if (len(data) - HEADERSIZE) % 4 != 0:
+                    print(
+                        f"Received invalid data length from {client_addr}: {len(data) - HEADERSIZE}"
+                    )
+                    print(len(data))
+                    udp_socket.close()
+                    return
+
+                # Check if the payload is all c of length len2 with padding
+                if data[HEADERSIZE : HEADERSIZE + len2] != c * len2:
+                    print(
+                        f"Invalid payload from {client_addr}. Should be all {c} of length {len2}."
+                    )
+                    udp_socket.close()
+                    return
+
+                if not check_zero(data, len2, payload_len):  # Only for stage D
+                    print(
+                        f"Invalid payload from {client_addr}. Non-zero bytes found after payload_len."
+                    )
+                    udp_socket.close()
+                    return
+
+            secretD = random.randint(0, 1000)
+            payload = struct.pack("!I", secretD)
+            packet = make_packet(payload, secretC, 2, student_id)
+            conn.send(packet)
+            print("Stage D done.")
+
+        except socket.timeout:
+            print(f"Did not receive any packets for 3 seconds. Closing TCP connection with {client_addr}.")
+            tcp_socket.close()
+            return
 
 
 while True:
