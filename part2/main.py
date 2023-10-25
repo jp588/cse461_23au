@@ -232,7 +232,7 @@ while True:
             listener.close()
             continue
 
-        if payload_len != 12 or len(data) - HEADERSIZE != payload_len:  # Not sure
+        if payload_len != 12 or len(data) - HEADERSIZE != payload_len:
             print(
                 f"Invalid payload_len: {payload_len} or mismatched packet length from {client_addr}"
             )
