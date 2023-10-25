@@ -164,12 +164,12 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
                 # Check the header
                 if step != 1:
                     print(f"Invalid step: {step} from {client_addr}")
-                    udp_socket.close()
+                    tcp_socket.close()
                     return
 
                 if secret != secretC:
                     print(f"Invalid secret: {secret} from {client_addr}")
-                    udp_socket.close()
+                    tcp_socket.close()
                     return
 
                 if (len(data) - HEADERSIZE) % 4 != 0:
@@ -177,7 +177,7 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
                         f"Received invalid data length from {client_addr}: {len(data) - HEADERSIZE}"
                     )
                     print(len(data))
-                    udp_socket.close()
+                    tcp_socket.close()
                     return
 
                 # Check if the payload is all c of length len2 with padding
@@ -185,14 +185,14 @@ def handle_client(num, len_, udp_port, secretA, client_addr, student_id):
                     print(
                         f"Invalid payload from {client_addr}. Should be all {c} of length {len2}."
                     )
-                    udp_socket.close()
+                    tcp_socket.close()
                     return
 
                 if not check_zero(data, len2, payload_len):  # Only for stage D
                     print(
                         f"Invalid payload from {client_addr}. Non-zero bytes found after payload_len."
                     )
-                    udp_socket.close()
+                    tcp_socket.close()
                     return
 
             secretD = random.randint(0, 1000)
