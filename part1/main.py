@@ -120,6 +120,7 @@ finally:
     sock.close()
 print()
 
+time.sleep(1)
 
 print("Step c1")
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -146,5 +147,7 @@ data = sock.recv(2048)
 print(f"data: {data}")
 secretD = struct.unpack("!I", data[HEADERSIZE:])[0]
 print(f"secretD: {secretD}")
+
+print(f"secretA: {secretA}, secretB: {secretB}, secretC: {secretC}, secretD: {secretD}")
 
 sock.close()
