@@ -88,7 +88,7 @@ class Part3Controller(object):
 
         # Block any ICMP traffic from the untrusted host.
         match = of.ofp_match()
-        match.dl_type = 0x0800  # IP type
+        match.dl_type = 0x800  # IP type
         match.nw_src = IPAddr(IPS["hnotrust"])
         match.nw_proto = 1  # ICMP protocol
         self.connection.send(of.ofp_flow_mod(match=match, command=of.OFPFC_ADD))
@@ -100,10 +100,11 @@ class Part3Controller(object):
             (IPS["h20"], 2),
             (IPS["h30"], 3),
             (IPS["serv1"], 4),
+            (IPS["hnotrust"], 5),
         ]
         for host_ip, output_port in hosts_switches:
             match = of.ofp_match()
-            match.dl_type = 0x0800  # IP type
+            match.dl_type = 0x800  # IP type
             match.nw_dst = IPAddr(host_ip)
             action = of.ofp_action_output(port=output_port)
             self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
