@@ -24,6 +24,25 @@ class Firewall(object):
         connection.addListeners(self)
 
         # add switch rules here
+        # ARP rule
+        arp_flow = of.ofp_flow_mod()
+        arp_flow.match.dl_type = 0x0806  # ARP
+        arp_flow.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))
+        connection.send(arp_flow)
+
+        # ICMP rule
+        icmp_flow = of.ofp_flow_mod()
+        icmp_flow.match.dl_type = 0x0800  # IP
+        icmp_flow.match.nw_proto = 1  # ICMP
+        icmp_flow.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))
+        connection.send(icmp_flow)
+
+        # Default drop rule
+        drop_flow = of.ofp_flow_mod()
+        drop_flow.priority = 1  # low priority
+        # No match specified, so it matches everything
+        # No actions, so it drops all matching packets
+        connection.send(drop_flow)
 
     def _handle_PacketIn(self, event):
         """
