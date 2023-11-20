@@ -138,9 +138,14 @@ class Part4Controller(object):
             return
 
         packet_in = event.ofp  # The actual ofp_packet_in message.
-        print(
-            "Unhandled packet from " + str(self.connection.dpid) + ":" + packet.dump()
-        )
+        # Handle ARP requests across subnets
+        if packet.type == packet.ARP_TYPE:
+            self.handle_arp(packet, packet_in)
+        # Forward IP packets, reply if they're ICMP pings to the router
+        elif packet.type == packet.IP_TYPE:
+            self.handle_ip(packet, packet_in)
+        else:
+            pass  # TODO: flood
 
 
 def launch():
