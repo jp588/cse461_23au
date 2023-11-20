@@ -58,23 +58,63 @@ class Part4Controller(object):
 
     def s1_setup(self):
         # put switch 1 rules here
-        pass
+        # Flood all traffic coming into s1
+        match = of.ofp_match()
+        action = of.ofp_action_output(port=of.OFPP_FLOOD)
+        self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
     def s2_setup(self):
         # put switch 2 rules here
-        pass
+        # Flood all traffic coming into s2
+        match = of.ofp_match()
+        action = of.ofp_action_output(port=of.OFPP_FLOOD)
+        self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
     def s3_setup(self):
         # put switch 3 rules here
-        pass
+        # Flood all traffic coming into s3
+        match = of.ofp_match()
+        action = of.ofp_action_output(port=of.OFPP_FLOOD)
+        self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
     def cores21_setup(self):
         # put core switch rules here
-        pass
+        # Block untrusted host's ICMP and IP traffic to serv1
+        match = of.ofp_match()
+        match.dl_type = 0x800  # IP type
+        match.nw_src = IPAddr(IPS["hnotrust"])
+        match.nw_dst = IPAddr(IPS["serv1"])
+        self.connection.send(of.ofp_flow_mod(match=match, command=of.OFPFC_ADD))
+
+        # Block any ICMP traffic from the untrusted host.
+        match = of.ofp_match()
+        match.dl_type = 0x800  # IP type
+        match.nw_src = IPAddr(IPS["hnotrust"])
+        match.nw_proto = 1  # ICMP protocol
+        self.connection.send(of.ofp_flow_mod(match=match, command=of.OFPFC_ADD))
+
+        # add routing logic here
+        # For each host hX, add a route from cores21 to the switch sY connected to hX.
+        hosts_switches = [
+            (IPS["h10"], 1),
+            (IPS["h20"], 2),
+            (IPS["h30"], 3),
+            (IPS["serv1"], 4),
+            (IPS["hnotrust"], 5),
+        ]
+        for host_ip, output_port in hosts_switches:
+            match = of.ofp_match()
+            match.dl_type = 0x800  # IP type
+            match.nw_dst = IPAddr(host_ip)
+            action = of.ofp_action_output(port=output_port)
+            self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
     def dcs31_setup(self):
         # put datacenter switch rules here
-        pass
+        # Flood all traffic coming into dcs31
+        match = of.ofp_match()
+        action = of.ofp_action_output(port=of.OFPP_FLOOD)
+        self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
     # used in part 4 to handle individual ARP packets
     # not needed for part 3 (USE RULES!)
