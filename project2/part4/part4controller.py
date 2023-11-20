@@ -152,6 +152,12 @@ class Part4Controller(object):
             msg.in_port = packet_in.in_port
             self.connection.send(msg)
 
+    def handle_arp(self, packet, packet_in):
+        pass
+
+    def handle_ipv4(self, packet, packet_in):
+        pass
+
 
 def launch():
     """
