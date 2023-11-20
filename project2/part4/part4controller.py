@@ -143,7 +143,7 @@ class Part4Controller(object):
             self.handle_arp(packet, packet_in)
         # Forward IP packets, reply if they're ICMP pings to the router
         elif packet.type == packet.IP_TYPE:
-            self.handle_ip(packet, packet_in)
+            self.handle_ipv4(packet, packet_in)
         else:
             pass  # TODO: flood
 
