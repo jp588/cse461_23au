@@ -144,8 +144,13 @@ class Part4Controller(object):
         # Forward IP packets, reply if they're ICMP pings to the router
         elif packet.type == packet.IP_TYPE:
             self.handle_ipv4(packet, packet_in)
+        # Flood all other packets
         else:
-            pass  # TODO: flood
+            msg = of.ofp_packet_out()
+            msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))
+            msg.buffer_id = packet_in.buffer_id
+            msg.in_port = packet_in.in_port
+            self.connection.send(msg)
 
 
 def launch():
