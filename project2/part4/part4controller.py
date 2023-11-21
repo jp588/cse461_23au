@@ -160,7 +160,9 @@ class Part4Controller(object):
             self.ip_to_port[arp_addr] = packet_in.in_port
 
     def handle_ipv4(self, packet, packet_in):
-        pass
+        ipv4 = packet.payload
+        dst_ip = ipv4.dstip
+        # TODO: Handle ICMP pings to the router
 
 
 def launch():
