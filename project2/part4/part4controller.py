@@ -159,6 +159,13 @@ class Part4Controller(object):
             arp_addr = IPAddr(arp.protosrc)
             self.ip_to_port[arp_addr] = packet_in.in_port
 
+            # Add route dynamically
+            match = of.ofp_match()
+            match.dl_type = 0x800  # IP type
+            match.nw_dst = IPAddr(arp_addr)
+            action = of.ofp_action_output(port=self.ip_to_port[arp_addr])
+            self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
+
     def handle_ipv4(self, packet, packet_in):
         ipv4 = packet.payload
         ipv4_addr = IPAddr(ipv4.dstip)
