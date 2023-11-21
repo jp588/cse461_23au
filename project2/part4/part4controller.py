@@ -148,7 +148,8 @@ class Part4Controller(object):
                 arp_reply.hwsrc = arp.hwsrc
                 arp_reply.hwdst = arp.hwdst
                 arp_reply.opcode = arp.REPLY
-                arp_reply.protosrc, arp_reply.protodst = arp.protodst, arp.protosrc
+                arp_reply.protosrc = arp.protodst
+                arp_reply.protodst = arp.protosrc
                 self.resend_packet(arp_reply.pack(), packet_in.in_port)
 
             # Learn the port from the request
