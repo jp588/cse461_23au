@@ -38,6 +38,8 @@ class Part4Controller(object):
         # Keep track of the connection to the switch so that we can
         # send it messages!
         self.connection = connection
+        # Keep track of the hosts that are on each port.
+        self.ip_to_port = {}
 
         # This binds our PacketIn event listener
         connection.addListeners(self)
