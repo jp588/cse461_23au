@@ -171,8 +171,15 @@ class Part4Controller(object):
         ipv4_addr = IPAddr(ipv4.dstip)
         if ipv4_addr in self.ip_to_port:
             self.resend_packet(packet, self.ip_to_port[ipv4_addr])
-        else:
-            self.resend_packet(packet, of.OFPP_FLOOD)
+            return
+
+        self.ip_to_port[ipv4_addr] = packet_in.in_port
+
+        match = of.ofp_match()
+        match.dl_type = 0x800
+        match.nw_dst = ipv4_addr
+        action = of.ofp_action_output(port=self.ip_to_port[ipv4_addr])
+        self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
 
 
 def launch():
