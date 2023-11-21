@@ -160,7 +160,12 @@ class Part4Controller(object):
             self.ip_to_port[arp_addr] = packet_in.in_port
 
     def handle_ipv4(self, packet, packet_in):
-        pass
+        ipv4 = packet.payload
+        ipv4_addr = IPAddr(ipv4.dstip)
+        if ipv4_addr in self.ip_to_port:
+            self.resend_packet(packet, self.ip_to_port[ipv4_addr])
+        else:
+            self.resend_packet(packet, of.OFPP_FLOOD)
 
 
 def launch():
