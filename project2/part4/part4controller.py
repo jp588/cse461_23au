@@ -93,22 +93,6 @@ class Part4Controller(object):
         match.nw_proto = 1  # ICMP protocol
         self.connection.send(of.ofp_flow_mod(match=match, command=of.OFPFC_ADD))
 
-        # add routing logic here
-        # For each host hX, add a route from cores21 to the switch sY connected to hX.
-        hosts_switches = [
-            (IPS["h10"], 1),
-            (IPS["h20"], 2),
-            (IPS["h30"], 3),
-            (IPS["serv1"], 4),
-            (IPS["hnotrust"], 5),
-        ]
-        for host_ip, output_port in hosts_switches:
-            match = of.ofp_match()
-            match.dl_type = 0x800  # IP type
-            match.nw_dst = IPAddr(host_ip)
-            action = of.ofp_action_output(port=output_port)
-            self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
-
     def dcs31_setup(self):
         # put datacenter switch rules here
         # Flood all traffic coming into dcs31
