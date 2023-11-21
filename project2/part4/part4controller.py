@@ -139,7 +139,15 @@ class Part4Controller(object):
             self.connection.send(msg)
 
     def handle_arp(self, packet, packet_in):
-        pass
+        arp = packet.payload
+        if arp.opcode == arp.REQUEST:
+            arp_addr = IPAddr(arp.protosrc)
+            if arp_addr in self.ip_to_port:
+                # Send ARP reply
+                pass
+
+            # Learn the port for the request
+            self.ip_to_port[arp_addr] = packet_in.in_port
 
     def handle_ipv4(self, packet, packet_in):
         pass
