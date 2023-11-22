@@ -129,9 +129,11 @@ class Part4Controller(object):
             self.handle_arp(packet, packet_in)
         # Forward IP packets, reply if they're ICMP pings to the router
         elif packet.type == packet.IP_TYPE:
+            print("IP packet")
             self.handle_ipv4(packet, packet_in)
         # Flood all other packets
         else:
+            print("Unknown packet type")
             msg = of.ofp_packet_out()
             msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))
             msg.buffer_id = packet_in.buffer_id
@@ -141,30 +143,69 @@ class Part4Controller(object):
     def handle_arp(self, packet, packet_in):
         arp = packet.payload
         if arp.opcode == arp.REQUEST:
-            arp_addr = IPAddr(arp.protosrc)
-            if arp_addr in self.ip_to_port:
+            src_addr = IPAddr(arp.protosrc)
+            dst_addr = IPAddr(arp.protodst)
+
+            if dst_addr in self.ip_to_port:
+                print("ARP request for known IP")
                 # Create ARP reply packet
-                arp_reply = arp
-                arp_reply.hwsrc = arp.hwsrc
-                arp_reply.hwdst = arp.hwdst
+                arp_reply = packet.arp()
+                arp_reply.hwsrc = EthAddr(self.router_mac)
+                arp_reply.hwdst = arp.hwsrc
                 arp_reply.opcode = arp.REPLY
                 arp_reply.protosrc = arp.protodst
                 arp_reply.protodst = arp.protosrc
-                self.resend_packet(arp_reply.pack(), packet_in.in_port)
 
+                eth_reply = packet.ethernet(
+                    type=packet.ethernet.ARP_TYPE, src=self.router_mac, dst=packet.src
+                )
+                eth_reply.set_payload(arp_reply)
+
+                self.resend_packet(eth_reply, packet_in.in_port)
+                return
+
+            print("ARP request for unknown IP")
+            print(src_addr, "->", dst_addr)
             # Learn the port from the request
-            self.ip_to_port[arp_addr] = packet_in.in_port
-        elif arp.opcode == arp.REPLY:
-            # Learn the port from the reply
-            arp_addr = IPAddr(arp.protosrc)
-            self.ip_to_port[arp_addr] = packet_in.in_port
+            self.ip_to_port[src_addr] = packet_in.in_port
 
             # Add route dynamically
             match = of.ofp_match()
             match.dl_type = 0x800  # IP type
-            match.nw_dst = IPAddr(arp_addr)
-            action = of.ofp_action_output(port=self.ip_to_port[arp_addr])
+            match.nw_dst = dst_addr
+            action = of.ofp_action_output(port=self.ip_to_port[src_addr])
             self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
+
+            # Create ARP reply packet
+            # arp_reply = arp
+            # arp_reply.hwsrc = arp.hwsrc
+            # arp_reply.hwdst = arp.hwdst
+            # arp_reply.opcode = arp.REPLY
+            # arp_reply.protosrc = arp.protodst
+            # arp_reply.protodst = arp.protosrc
+            # self.resend_packet(arp_reply.pack(), packet_in.in_port)
+
+        elif arp.opcode == arp.REPLY:
+            print("ARP reply")
+
+            src_ip = arp_packet.protosrc  # Source IP Address
+            src_mac = arp_packet.hwsrc  # Source MAC Address
+
+            self.arp_cache[src_ip] = src_mac
+
+            # Learn the port from the reply
+            # arp_addr = IPAddr(arp.protosrc)
+            # self.ip_to_port[arp_addr] = packet_in.in_port
+            #
+            # # Add route dynamically
+            # match = of.ofp_match()
+            # match.dl_type = 0x800  # IP type
+            # match.nw_dst = IPAddr(arp_addr)
+            # action = of.ofp_action_output(port=self.ip_to_port[arp_addr])
+            # self.connection.send(of.ofp_flow_mod(match=match, actions=[action]))
+            #
+            # # Create ARP reply packet
+            # self.resend_packet(packet, packet_in.in_port)
 
     def handle_ipv4(self, packet, packet_in):
         ipv4 = packet.payload
