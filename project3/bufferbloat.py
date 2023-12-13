@@ -72,8 +72,8 @@ class BBTopo(Topo):
         switch = self.addSwitch('s0')
 
         # TODO: Add links with appropriate characteristics
-        self.addLink(h1, switch, bw=args.bw_host, delay='10ms', max_queue_size=args.maxq)
-        self.addLink(h2, switch, bw=args.bw_net, delay='10ms', max_queue_size=args.maxq) # TODO: use arg?
+        self.addLink(h1, switch, bw=args.bw_host, delay=args.delay, max_queue_size=args.maxq)
+        self.addLink(h2, switch, bw=args.bw_net, delay=args.delay, max_queue_size=args.maxq)
 
 # Simple wrappers around monitoring utilities.  You are welcome to
 # contribute neatly written (using classes) monitoring scripts for
