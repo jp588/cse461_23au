@@ -12,6 +12,7 @@ from multiprocessing import Process
 from argparse import ArgumentParser
 
 from monitor import monitor_qlen
+import helper
 
 import sys
 import os
@@ -63,12 +64,16 @@ class BBTopo(Topo):
 
     def build(self, n=2):
         # TODO: create two hosts
+        h1 = self.addHost('h1')
+        h2 = self.addHost('h2')
 
         # Here I have created a switch.  If you change its name, its
         # interface names will change from s0-eth1 to newname-eth1.
         switch = self.addSwitch('s0')
 
         # TODO: Add links with appropriate characteristics
+        self.addLink(h1, switch, bw=args.bw_host, delay='10ms', max_queue_size=args.maxq)
+        self.addLink(h2, switch, bw=args.bw_net, delay='10ms', max_queue_size=args.maxq)
 
 # Simple wrappers around monitoring utilities.  You are welcome to
 # contribute neatly written (using classes) monitoring scripts for
@@ -85,7 +90,8 @@ def start_iperf(net):
 
     # TODO: Start the iperf client on h1.  Ensure that you create a
     # long lived TCP flow.
-    # client = ... 
+    print("Starting iperf client...")
+    client = h1.popen("iperf -c %s -t %d" % (h2.IP(), args.time))
 
 def start_qmon(iface, interval_sec=0.1, outfile="q.txt"):
     monitor = Process(target=monitor_qlen,
@@ -97,11 +103,15 @@ def start_ping(net):
     # TODO: Start a ping train from h1 to h2 (or h2 to h1, does it
     # matter?)  Measure RTTs every 0.1 second.  Read the ping man page
     # to see how to do this.
+    h1 = net.get('h1')
+    h2 = net.get('h2')
+    print("Starting ping train...")
 
     # Hint: Use host.popen(cmd, shell=True).  If you pass shell=True
     # to popen, you can redirect cmd's output using shell syntax.
     # i.e. ping ... > /path/to/ping.
-    pass
+    # pass
+    ping = h1.popen("ping -i 0.1 %s > %s/ping.txt" % (h2.IP(), args.dir), shell=True)
 
 def start_webserver(net):
     h1 = net.get('h1')
@@ -109,12 +119,21 @@ def start_webserver(net):
     sleep(1)
     return [proc]
 
+def start_curl(net):
+    h1 = net.get('h1')
+    h2 = net.get('h2')
+    print("Starting curl download...")
+    # Run curl command on h2 to download webpage from h1
+    # Use -o to redirect output to /dev/null, -s to run in silent mode, and -w to print the total time taken
+    # Repeat this every 5 seconds
+    curl = h2.popen("while true; do curl -o /dev/null -s -w %%{time_total} http://%s/index.html; sleep 5; done > %s/curl.txt" % (h1.IP(), args.dir), shell=True)
+
 def bufferbloat():
     if not os.path.exists(args.dir):
         os.makedirs(args.dir)
     os.system("sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
     topo = BBTopo()
-    net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink)
+    net = Mininet(topo=topo, controller=None, host=CPULimitedHost, link=TCLink)
     net.start()
     # This dumps the topology and how nodes are interconnected through
     # links.
@@ -131,7 +150,9 @@ def bufferbloat():
                       outfile='%s/q.txt' % (args.dir))
 
     # TODO: Start iperf, webservers, etc.
-    # start_iperf(net)
+    start_iperf(net)
+    start_webserver(net)
+    start_curl(net)
 
     # TODO: measure the time it takes to complete webpage transfer
     # from h1 to h2 (say) 3 times.  Hint: check what the following
@@ -140,6 +161,9 @@ def bufferbloat():
     # spawned on host h1 (not from google!)
     # Hint: Verify the url by running your curl command without the
     # flags. The html webpage should be returned as the response.
+    h1 = net.get('h1')
+    h2 = net.get('h2')
+    curl = h2.popen("for i in 1 2 3; do curl -o /dev/null -s -w %%{time_total} http://%s/index.html; sleep 5; done > %s/curl.txt" % (h1.IP(), args.dir), shell=True)
 
     # Hint: have a separate function to do this and you may find the
     # loop below useful.
@@ -156,6 +180,14 @@ def bufferbloat():
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
+    times = helper.read_list('%s/curl.txt' % args.dir)
+    times = [float(time[0]) for time in times]  # Convert to float
+
+    avg_time = helper.avg(times)
+    std_dev = helper.stdev(times)
+
+    print("Average fetch time: %.2f seconds" % avg_time)
+    print("Standard deviation: %.2f seconds" % std_dev)
 
     # Hint: The command below invokes a CLI which you can use to
     # debug.  It allows you to run arbitrary commands inside your
