@@ -126,7 +126,28 @@ def start_curl(net):
     # Run curl command on h2 to download webpage from h1
     # Use -o to redirect output to /dev/null, -s to run in silent mode, and -w to print the total time taken
     # Repeat this every 5 seconds
-    curl = h2.popen("while true; do curl -o /dev/null -s -w %%{time_total} http://%s/index.html; sleep 5; done > %s/curl.txt" % (h1.IP(), args.dir), shell=True)
+    curl_cmd = "curl -o /dev/null -s -w %%{time_total} http://%s/index.html" % (h1.IP())
+
+    # Hint: have a separate function to do this and you may find the
+    # loop below useful.
+    times = []
+    start_time = time()
+    while True:
+        # do the measurement (say) 3 times.
+        t = 0.0
+        for _ in range(3):
+            curl = h2.popen(curl_cmd, shell=True, stdout=PIPE)
+            t += float(curl.stdout.read())
+
+        times.append(t)
+        sleep(5)
+        now = time()
+        delta = now - start_time
+        if delta > args.time:
+            break
+        print("%.1fs left..." % (args.time - delta))
+
+    return times
 
 def bufferbloat():
     if not os.path.exists(args.dir):
@@ -152,7 +173,6 @@ def bufferbloat():
     # TODO: Start iperf, webservers, etc.
     start_iperf(net)
     start_webserver(net)
-    start_curl(net)
 
     # TODO: measure the time it takes to complete webpage transfer
     # from h1 to h2 (say) 3 times.  Hint: check what the following
@@ -161,28 +181,11 @@ def bufferbloat():
     # spawned on host h1 (not from google!)
     # Hint: Verify the url by running your curl command without the
     # flags. The html webpage should be returned as the response.
-    h1 = net.get('h1')
-    h2 = net.get('h2')
-    curl = h2.popen("for i in 1 2 3; do curl -o /dev/null -s -w %%{time_total} http://%s/index.html; sleep 5; done > %s/curl.txt" % (h1.IP(), args.dir), shell=True)
-
-    # Hint: have a separate function to do this and you may find the
-    # loop below useful.
-    start_time = time()
-    while True:
-        # do the measurement (say) 3 times.
-        sleep(5)
-        now = time()
-        delta = now - start_time
-        if delta > args.time:
-            break
-        print("%.1fs left..." % (args.time - delta))
+    times = start_curl(net)
 
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
-    times = helper.read_list('%s/curl.txt' % args.dir)
-    times = [float(time[0]) for time in times]  # Convert to float
-
     avg_time = helper.avg(times)
     std_dev = helper.stdev(times)
 
