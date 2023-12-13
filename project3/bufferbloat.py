@@ -139,8 +139,8 @@ def start_curl(net):
     while True:
         # do the measurement (say) 3 times.
         for _ in range(3):
-            curl = h2.popen(curl_cmd, shell=True, stdout=PIPE)
-            times.append(float(curl.stdout.read()))
+            curl_proc = h2.popen(curl_cmd, shell=True, stdout=PIPE)
+            times.append(float(curl_proc.stdout.read()))
 
         sleep(5)
         now = time()
