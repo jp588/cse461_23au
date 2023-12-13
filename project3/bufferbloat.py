@@ -64,7 +64,7 @@ class BBTopo(Topo):
     "Simple topology for bufferbloat experiment."
 
     def build(self, n=2):
-        # TODO: create two hosts
+        # Create two hosts
         h1 = self.addHost('h1')
         h2 = self.addHost('h2')
 
@@ -72,7 +72,7 @@ class BBTopo(Topo):
         # interface names will change from s0-eth1 to newname-eth1.
         switch = self.addSwitch('s0')
 
-        # TODO: Add links with appropriate characteristics
+        # Add links with appropriate characteristics
         self.addLink(h1, switch, bw=args.bw_host, delay=args.delay, max_queue_size=args.maxq)
         self.addLink(h2, switch, bw=args.bw_net, delay=args.delay, max_queue_size=args.maxq)
 
@@ -89,7 +89,7 @@ def start_iperf(net):
     # there is a chance that the router buffer may not get filled up.
     server = h2.popen("iperf -s -w 16m")
 
-    # TODO: Start the iperf client on h1.  Ensure that you create a
+    # Start the iperf client on h1.  Ensure that you create a
     # long lived TCP flow.
     print("Starting iperf client...")
     client = h1.popen("iperf -c %s -t %d" % (h2.IP(), args.time))
@@ -101,7 +101,7 @@ def start_qmon(iface, interval_sec=0.1, outfile="q.txt"):
     return monitor
 
 def start_ping(net):
-    # TODO: Start a ping train from h1 to h2 (or h2 to h1, does it
+    # Start a ping train from h1 to h2 (or h2 to h1, does it
     # matter?)  Measure RTTs every 0.1 second.  Read the ping man page
     # to see how to do this.
     h1 = net.get('h1')
@@ -111,7 +111,6 @@ def start_ping(net):
     # Hint: Use host.popen(cmd, shell=True).  If you pass shell=True
     # to popen, you can redirect cmd's output using shell syntax.
     # i.e. ping ... > /path/to/ping.
-    # pass
     ping = h1.popen("ping -i 0.1 %s > %s/ping.txt" % (h2.IP(), args.dir), shell=True)
 
 def start_webserver(net):
@@ -129,9 +128,6 @@ def start_curl(net):
     # Repeat this every 5 seconds
     curl_cmd = "curl -o /dev/null -s -w %%{time_total} %s/http/index.html" % (h1.IP())
     
-    # curl = h2.popen("curl %s/http/index.html" % (h1.IP()), shell=True, stdout=PIPE)
-    # print(curl.stdout.read())
-
     # Hint: have a separate function to do this and you may find the
     # loop below useful.
     times = []
@@ -164,7 +160,7 @@ def bufferbloat():
     # This performs a basic all pairs ping test.
     net.pingAll()
 
-    # TODO: Start monitoring the queue sizes.  Since the switch I
+    # Start monitoring the queue sizes.  Since the switch I
     # created is "s0", I monitor one of the interfaces.  Which
     # interface?  The interface numbering starts with 1 and increases.
     # Depending on the order you add links to your network, this
@@ -172,12 +168,12 @@ def bufferbloat():
     qmon = start_qmon(iface='s0-eth2',
                       outfile='%s/q.txt' % (args.dir))
 
-    # TODO: Start iperf, webservers, etc.
+    # Start iperf, webservers, etc.
     start_iperf(net)
     start_ping(net)
     start_webserver(net)
 
-    # TODO: measure the time it takes to complete webpage transfer
+    # Measure the time it takes to complete webpage transfer
     # from h1 to h2 (say) 3 times.  Hint: check what the following
     # command does: curl -o /dev/null -s -w %{time_total} google.com
     # Now use the curl command to fetch webpage from the webserver you
@@ -186,7 +182,7 @@ def bufferbloat():
     # flags. The html webpage should be returned as the response.
     times = start_curl(net)
 
-    # TODO: compute average (and standard deviation) of the fetch
+    # Compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
     avg_time = helper.avg(times)
