@@ -154,6 +154,7 @@ def bufferbloat():
     topo = BBTopo()
     net = Mininet(topo=topo, controller=None, switch=OVSBridge, host=CPULimitedHost, link=TCLink)
     net.start()
+    # CLI(net)
     # This dumps the topology and how nodes are interconnected through
     # links.
     dumpNodeConnections(net.hosts)
