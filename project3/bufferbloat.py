@@ -116,7 +116,7 @@ def start_ping(net):
 
 def start_webserver(net):
     h1 = net.get('h1')
-    proc = h1.popen("python http/webserver.py", shell=True)
+    proc = h1.popen("sudo python2 http/webserver.py", shell=True)
     sleep(1)
     return [proc]
 
@@ -127,7 +127,10 @@ def start_curl(net):
     # Run curl command on h2 to download webpage from h1
     # Use -o to redirect output to /dev/null, -s to run in silent mode, and -w to print the total time taken
     # Repeat this every 5 seconds
-    curl_cmd = "curl -o /dev/null -s -w %%{time_total} http://%s/index.html" % (h1.IP())
+    curl_cmd = "curl -o /dev/null -s -w %%{time_total} %s/http/index.html" % (h1.IP())
+    
+    # curl = h2.popen("curl %s/http/index.html" % (h1.IP()), shell=True, stdout=PIPE)
+    # print(curl.stdout.read())
 
     # Hint: have a separate function to do this and you may find the
     # loop below useful.
