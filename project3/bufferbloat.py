@@ -5,6 +5,7 @@ from mininet.net import Mininet
 from mininet.log import lg, info
 from mininet.util import dumpNodeConnections
 from mininet.cli import CLI
+from mininet.node import OVSBridge
 
 from subprocess import Popen, PIPE
 from time import sleep, time
@@ -152,7 +153,7 @@ def bufferbloat():
         os.makedirs(args.dir)
     os.system("sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
     topo = BBTopo()
-    net = Mininet(topo=topo, controller=None, host=CPULimitedHost, link=TCLink)
+    net = Mininet(topo=topo, controller=None, switch=OVSBridge, host=CPULimitedHost, link=TCLink)
     net.start()
     # This dumps the topology and how nodes are interconnected through
     # links.
