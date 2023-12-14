@@ -17,7 +17,7 @@ Part 2
     $ sudo python3 -m pip install mininet matplotlib
     ```
   2. Unzip the file `kmatsui_apul710_jpark58.zip`
-  3. Under the unzipped `project3` directory, run the script `sudo ./run.sh`
+  3. Under the unzipped directory, run the script `sudo ./run.sh`
 
 Part 3
   1. Make sure to install the necessary packages using the commands below:
@@ -27,7 +27,7 @@ Part 3
     $ sudo python3 -m pip install mininet matplotlib
     ```
   2. Unzip the file `kmatsui_apul710_jpark58.zip`
-  3. Under the unzipped `project3` directory, run the script `sudo ./run_bbr.sh`
+  3. Under the unzipped directory, run the script `sudo ./run_bbr.sh`
 
 
 Answers to the questions:
