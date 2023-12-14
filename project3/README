@@ -1,22 +1,75 @@
-Name:
-UWNetID:
+Name: Ken Matsui
+UWNetID: kmatsui
 
-Name:
-UWNetID:
+Name: Alexander James Pullen
+UWNetID: apul710
 
-Name:
-UWNetID:
+Name: Jae Park
+UWNetID: jpark58
 
 Instructions to reproduce the results:
-  TODO
+  1. Place run.sh and bufferbloat.py under the project3 starter code folder.
+  2. Install the necessary packages using the commands below:
+      $ sudo apt-get update
+      $ sudo apt install python3-pip
+      $ sudo python3 -m pip install mininet matplotlib
+  3. Run the script using sudo sudo ./run.sh
+
 
 Answers to the questions:
 Part 2
-  1. TODO
-  2. TODO
-  3. TODO
-  4. TODO
+  1.
+q=20:
+Average webpage fetch time: 4.13 seconds
+Standard deviation: 1.89 seconds
+q=100:
+Average webpage fetch time: 10.47 seconds
+Standard deviation: 3.43 seconds
+
+  2.
+When the router buffer is larger, more packets can be queued before getting dropped,
+leading to TCP senders to increase window size until significant packet delays due to full buffer.
+This bufferbloat can result in longer transmission times and congestion leading to slower webpage fetch times.
+With smaller router buffers there are fewer delays since fewer packets queue before getting dropped,
+leading to quicker transmission times and webpage fetch times.
+
+  3.
+Maximum transmission unit: 1500 bytes * 8 bits/byte = 12000 bits
+Transmission rate: 100Mb/s * 1,000,000 bits/Mb = 100,000,000 bits/s
+the maximum time a packet might wait:
+12000 bits / 100,000,000 bits/s = 0.00012s
+0.00012s * 1000 packets = 0.12s
+
+  4.
+When the queue size (q=20) is reduced, it holds fewer packets and therefore fills more quickly,
+leading to early packet drops and TCP Reno reducing its congestion window size and slowing sending rates in response.
+As a result, less time is spent waiting in the buffer, leading to lower RTTs.
+When the queue size (q=100) increases, it holds more packets,
+leading the buffer to fill more slowly and leading to TCP Reno reacting slower under high network loads;
+leading to longer wait times in the buffer and higher RTTs.
+
+
 Part 3
-  1. TODO
-  2. TODO
-  3. TODO
+  1.
+q=20:
+	Average webpage fetch time of 3.09 seconds, standard deviation of 2.48 seconds
+q=100:
+	Average webpage fetch time of 2.37 seconds, standard deviation of 1.70 seconds
+
+  2.
+For q=20, BBR’s 3.09s fetch time is lower than Reno’s 4.13s; for q=100,
+BBR’s fetch time of 2.37s is also lower than Reno’s 10.47 - clearly an improvement in both cases.
+BBR differs from Reno in that increasing the queue length actually shortens the fetch time (3.09s -> 2.37s)
+rather than lengthening it (4.13s -> 10.47s).
+
+  3.
+In Part 2, the queue is on average more full than it is in Part 3, for both queue sizes.
+This reflects the Reno congestion control protocol relying on packet loss as a result
+of queues filling up for its congestion indicator, while BBR uses other indicators that allow congestion
+to be detected and reduced before queues fill up.
+
+  4.
+If the bufferbloat problem was only mitigated by BBR and not fully solved,
+we would expect average fetch time to be lower than for Reno but still be increasing for larger queue sizes.
+In fact we see that in Part 3, fetch time goes down as the queue becomes larger,
+therefore the bufferbloat problem appears to have been eliminated.
