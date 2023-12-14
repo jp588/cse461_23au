@@ -7,13 +7,27 @@ UWNetID: apul710
 Name: Jae Park
 UWNetID: jpark58
 
+
 Instructions to reproduce the results:
-  1. Place run.sh and bufferbloat.py under the project3 starter code folder.
-  2. Install the necessary packages using the commands below:
-      $ sudo apt-get update
-      $ sudo apt install python3-pip
-      $ sudo python3 -m pip install mininet matplotlib
-  3. Run the script using sudo sudo ./run.sh
+Part 2
+  1. Make sure to install the necessary packages using the commands below:
+    ```
+    $ sudo apt-get update
+    $ sudo apt install python3-pip
+    $ sudo python3 -m pip install mininet matplotlib
+    ```
+  2. Unzip the file `kmatsui_apul710_jpark58.zip`
+  3. Under the unzipped `project3` directory, run the script `sudo ./run.sh`
+
+Part 3
+  1. Make sure to install the necessary packages using the commands below:
+    ```
+    $ sudo apt-get update
+    $ sudo apt install python3-pip
+    $ sudo python3 -m pip install mininet matplotlib
+    ```
+  2. Unzip the file `kmatsui_apul710_jpark58.zip`
+  3. Under the unzipped `project3` directory, run the script `sudo ./run_bbr.sh`
 
 
 Answers to the questions:
